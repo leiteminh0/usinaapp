@@ -1,30 +1,64 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:usina_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('exibe o painel inicial e os acessos rápidos', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const UsinaApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Painel da usina'), findsOneWidget);
+    expect(find.text('Indicadores'), findsOneWidget);
+    expect(find.text('Equipamentos'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('abre o cadastro de indicador pelo menu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const UsinaApp());
+
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cadastro'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Indicador'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Novo indicador'), findsOneWidget);
+    expect(find.text('Salvar indicador'), findsOneWidget);
+  });
+
+  testWidgets('mostra validações nos campos obrigatórios', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const UsinaApp());
+
+    await tester.tap(find.text('Indicadores'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar indicador'));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Informe o nome'), findsOneWidget);
+    expect(find.text('Informe a descrição'), findsOneWidget);
+    expect(find.text('Informe a URL'), findsOneWidget);
+  });
+
+  testWidgets('valida URL e confirma o cadastro com dados válidos', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const UsinaApp());
+
+    await tester.tap(find.text('Indicadores'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byLabelText('Nome'), 'Produtividade');
+    await tester.enterText(
+      find.byLabelText('Descrição'),
+      'Acompanha a produção por hectare.',
+    );
+    await tester.enterText(find.byLabelText('URL'), 'https://exemplo.com');
+    await tester.tap(find.text('Salvar indicador'));
+    await tester.pump();
+
+    expect(find.text('Indicador cadastrado com sucesso!'), findsOneWidget);
   });
 }
